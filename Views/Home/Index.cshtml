@@ -1,6 +1,22 @@
-﻿
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+@if (TempData["AuthToken"] != null)
+{
+    <h1>Admin Dashboard</h1>
+
+    <p>Welcome, Admin! Here are your options:</p>
+
+    <ul class="admin-options">
+        <li>
+            <a asp-action="Index" asp-controller="Employee">Manage Employees</a>
+        </li>
+        <li>
+            <a asp-action="Index" asp-controller="Account">Manage Accounts</a>
+        </li>
+        <li>
+            <a asp-action="Index" asp-controller="LineOfBusiness">Manage Lines of Business</a>
+        </li>
+    </ul>
 }

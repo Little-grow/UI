@@ -1,4 +1,5 @@
 ﻿using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -22,6 +23,12 @@ namespace UI.Controllers
             _client.BaseAddress = baseAddress;
         }
 
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
         [HttpPost]
         public IActionResult Login(LoginViewModel model)
         {
@@ -37,13 +44,46 @@ namespace UI.Controllers
                 // Deserialize the response content to extract the token
                 var tokenResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseContent);
 
-                if (!tokenResponse.TryGetValue("token", out string token))
-                { 
-                    // Handle the case when the 'token' key is not found in the response
-                    return RedirectToAction("Login");
+                if (tokenResponse.TryGetValue("token", out string token))
+                {
+                    TempData["AuthToken"] = token;
+                    return View("Index");
                 }
             }
-            return View(model);
+            return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Rgister()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Register(LoginViewModel model)
+        {
+            string data = JsonConvert.SerializeObject(model);
+            StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = _client.PostAsync(_client.BaseAddress + "Admins/Register",content).Result;
+            if (response.IsSuccessStatusCode)
+            {
+                return View("Home/Index");
+            }
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult LogOut()
+        {
+            TempData.Remove("JsonToken");
+            return View();
         }
     }
 }

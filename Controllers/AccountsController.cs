@@ -1,10 +1,20 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ERPSystem.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace UI.Controllers
 {
     public class AccountsController : Controller
     {
+        Uri baseAddress = new Uri("https://localhost:7038/api");
+        private readonly HttpClient _client;
+
+        public AccountsController(IHttpClientFactory httpClientFactory)
+        {
+            _client = httpClientFactory.CreateClient();
+        }
         // GET: AccountsController
         public ActionResult Index()
         {
@@ -23,19 +33,16 @@ namespace UI.Controllers
             return View();
         }
 
+
         // POST: AccountsController/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(AccountDto account)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            string data = JsonConvert.SerializeObject(account);
+            StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = _client.PostAsync(_client.BaseAddress + "/Accounts/Post", content).Result;
+            return View();
         }
 
         // GET: AccountsController/Edit/5

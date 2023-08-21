@@ -25,12 +25,6 @@
                 <input type="submit" value="Login" class="btn btn-primary" />
             </div>
         </form>
+        <p>Don't have an account? <a href="@Url.Action("Register", "Home")">Sign up</a></p>
     </div>
 </div>
-
-@if (TempData["AuthToken"] != null)
-{
-    <div>
-        <a asp-action="Index">Back to List</a>
-    </div>
-}

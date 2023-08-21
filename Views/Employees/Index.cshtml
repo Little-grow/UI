@@ -1,10 +1,10 @@
-﻿@model IEnumerable<ERPSystem.Models.EmployeeDto>
+﻿@model IEnumerable<ERPSystem.Models.Employee>
 
 @{
     ViewData["Title"] = "Index";
 }
 
-@if (TempData["AuthToken"] != null)
+@if (ViewContext.HttpContext.Session.GetString("AuthToken") != null)
 {
     <h1>Index</h1>
 
@@ -14,20 +14,10 @@
     <table class="table">
         <thead>
             <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Name)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.NationalId)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.DateOfBirth)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.AccountId)
-                </th>
-                <th></th>
-            </tr>
+                <th>Name</th>
+                <th>National Id</th>
+                <th>Date of Birth</th>
+                <th>Account Id</th>
         </thead>
         <tbody>
             @foreach (var item in Model)
@@ -55,4 +45,8 @@
             }
         </tbody>
     </table>
+
+    <div>
+        <a asp-controller="Home" asp-action="Index">Back to main menu</a>
+    </div>
 }

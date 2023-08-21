@@ -1,14 +1,8 @@
-﻿using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using NuGet.Packaging.Signing;
-using NuGet.Protocol;
-using System.Diagnostics;
-using System.Net.Http.Headers;
 using System.Text;
 using UI.Models;
+
 
 namespace UI.Controllers
 {
@@ -19,15 +13,22 @@ namespace UI.Controllers
 
         public HomeController()
         {
-            _client = new HttpClient();
+            _client = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
             _client.BaseAddress = baseAddress;
         }
 
-
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
+
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
 
         [HttpPost]
         public IActionResult Login(LoginViewModel model)
@@ -46,21 +47,17 @@ namespace UI.Controllers
 
                 if (tokenResponse.TryGetValue("token", out string token))
                 {
-                    TempData["AuthToken"] = token;
-                    return View("Index");
+                    HttpContext.Session.SetString("AuthToken", token);
+
+                    return View("Index"); // Redirect to home page after successful login
                 }
             }
-            return RedirectToAction("Login");
+            return RedirectToAction("Login"); // Redirect to login page if login fails
         }
 
-        [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
 
         [HttpGet]
-        public IActionResult Rgister()
+        public IActionResult Register()
         {
             return View();
         }
@@ -71,10 +68,10 @@ namespace UI.Controllers
             string data = JsonConvert.SerializeObject(model);
             StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = _client.PostAsync(_client.BaseAddress + "Admins/Register",content).Result;
+            HttpResponseMessage response = _client.PostAsync(_client.BaseAddress + "Admins/Register", content).Result;
             if (response.IsSuccessStatusCode)
             {
-                return View("Home/Index");
+                return View("Login");
             }
             return View();
         }

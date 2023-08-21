@@ -3,6 +3,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
+builder.Services.AddSession();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -16,12 +17,20 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseRouting();
+app.UseSession();
+
+//Authorization Middleware
+// Add header:
+app.Use((context, next) =>
+{
+    context.Request.Headers["Authorization"] = context.Session.GetString("Authorization") == null ? "" : context.Session.GetString("Authorization");
+    return next.Invoke();
+}); app.UseRouting();
 
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Accounts}/{action=Create}");
+    pattern: "{controller=Home}/{action=Login}");
 
 app.Run();

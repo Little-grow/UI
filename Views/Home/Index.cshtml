@@ -2,21 +2,21 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-@if (TempData["AuthToken"] != null)
+@if (ViewContext.HttpContext.Session.GetString("AuthToken") != null)
 {
-    <h1>Admin Dashboard</h1>
+    <h1 style="font-size: 24px; margin-bottom: 10px;">Admin Dashboard</h1>
 
-    <p>Welcome, Admin! Here are your options:</p>
+    <p style="font-size: 18px; margin-bottom: 20px;">Welcome, Admin! Here are your options:</p>
 
     <ul class="admin-options">
         <li>
-            <a asp-action="Index" asp-controller="Employee">Manage Employees</a>
+            <a asp-action="Create" asp-controller="Employees" style="text-decoration: none; color: #007bff;">Manage Employees</a>
         </li>
         <li>
-            <a asp-action="Index" asp-controller="Account">Manage Accounts</a>
+            <a asp-action="Index" asp-controller="Accounts" style="text-decoration: none; color: #007bff;">Manage Accounts</a>
         </li>
         <li>
-            <a asp-action="Index" asp-controller="LineOfBusiness">Manage Lines of Business</a>
+            <a asp-action="Index" asp-controller="LinesOfBusiness" style="text-decoration: none; color: #007bff;">Manage Lines of Business</a>
         </li>
     </ul>
 }

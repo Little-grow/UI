@@ -13,11 +13,13 @@ namespace UI.Controllers
 
         public AccountsController(IHttpClientFactory httpClientFactory)
         {
-            _client = httpClientFactory.CreateClient();
+            _client = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
+            _client.BaseAddress = baseAddress;
         }
         // GET: AccountsController
         public ActionResult Index()
         {
+            HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + "/Accounts/GetAll").Result;
             return View();
         }
 

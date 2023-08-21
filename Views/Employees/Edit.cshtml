@@ -4,7 +4,7 @@
     ViewData["Title"] = "Edit";
 }
 
-@if (TempData["AuthToken"] != null)
+@if (ViewContext.HttpContext.Session.GetString("AuthToken") != null)
 {
     <h1>Edit</h1>
 

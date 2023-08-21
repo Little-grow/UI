@@ -1,7 +1,12 @@
-﻿using ERPSystem.Models;
+﻿using Azure;
+using ERPSystem.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using NuGet.Protocol;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
 namespace UI.Controllers
 {
@@ -10,114 +15,98 @@ namespace UI.Controllers
         Uri baseAddress = new Uri("https://localhost:7038/api/");
         private readonly HttpClient _client;
 
-        public EmployeesController(IHttpClientFactory httpClientFactory)
+        public EmployeesController()
         {
-            _client = httpClientFactory.CreateClient();
+            _client = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
+            _client.BaseAddress = baseAddress;
         }
 
-        private bool SetAuthorizationHeader()
+        private void AddTokenHeader()
         {
-            if (TempData.TryGetValue("AuthToken", out object token))
-            {
-                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.ToString());
-                return true;
-            }
-            return false;
+            // Get the token from the session
+            string? authToken = HttpContext.Session.GetString("AuthToken");
+
+            // Add the token to the request headers
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
         }
 
         [HttpGet]
         public IActionResult Index()
         {
-            if (SetAuthorizationHeader())
-            {
-                HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + "Employees/GetEmployees").Result;
-                if (response.IsSuccessStatusCode) 
-                    return View(response.Content);
-            }
-            return View("Home/Login");
-        }
+            AddTokenHeader();
+            var response = _client.GetAsync(_client.BaseAddress + "Employees/GetEmployees");
 
-        [HttpGet]
-        public ActionResult Details()
-        {
-            if (SetAuthorizationHeader())
-            {
+            var employeesJson = response.ToJson();
+            var employees = JsonConvert.DeserializeObject<List<Employee>>(employeesJson);
+            // Now you have the list of employees.
 
-            }
+            return View(employees);
 
-            return View("Home/Login");
+
+            //return View("../Home/Login");
         }
 
         [HttpGet]
         public ActionResult Details(int id)
         {
-            if (SetAuthorizationHeader())
-            {
-
-                return View();
-            }
-            return View("Home/Login");
+            AddTokenHeader();
+            var response = _client.GetAsync(_client.BaseAddress + "Employees/GetEmployee/{id}");
+            var employeeJson = response.ToJson();
+            var employee = JsonConvert.DeserializeObject<Employee>(employeeJson);
+            return View(employee);
         }
 
         [HttpGet]
         public ActionResult Create()
         {
-            if (SetAuthorizationHeader())
-            {
-                return View();
-            }
-
-            return View("Home/Login");
+            AddTokenHeader();
+            return View();
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult Create(EmployeeDto employeeDto)
         {
-            if (SetAuthorizationHeader())
-            {
-                return View();
-            }
-            return View("Home/Login");
+            AddTokenHeader();
+
+            string data = JsonConvert.SerializeObject(employeeDto);
+            StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
+
+            var reponse = _client.PostAsync(_client.BaseAddress + "Employees/PostEmployee", content);
+
+            return View();
         }
 
-        public ActionResult Edit(int id)
+        public ActionResult Edit()
         {
-            if (SetAuthorizationHeader())
-            {
-                return View();
-            }
-            return View("Home/Login");
+            AddTokenHeader();
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Edit(int id, EmployeeDto employeeDto)
+        {
+            AddTokenHeader();
+
+            string data = JsonConvert.SerializeObject(employeeDto);
+            StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
+
+            var response = _client.PutAsync(_client.BaseAddress + "Employees/PutEmployee/{id}", content);
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult Delete()
+        {
+            return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            if (SetAuthorizationHeader())
-            {
-                return View();
-            }
-            return View("Home/Login");
-        }
-
         public ActionResult Delete(int id)
         {
-            if (SetAuthorizationHeader())
-            {
-                return View();
-            }
-            return View("Home/Login");
-        }
+            AddTokenHeader();
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            if (SetAuthorizationHeader())
-            {
-                return View();
-            }
+            var reponse = _client.DeleteAsync(_client.BaseAddress + "Employees/DeleteEmployee/{id}");
             return View("Home/Login");
         }
     }

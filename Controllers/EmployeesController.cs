@@ -7,6 +7,7 @@ using NuGet.Protocol;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using UI.Models;
 
 namespace UI.Controllers
 {
@@ -14,6 +15,7 @@ namespace UI.Controllers
     {
         Uri baseAddress = new Uri("https://localhost:7038/api/");
         private readonly HttpClient _client;
+        //private int PageSize = 4;
 
         public EmployeesController()
         {
@@ -31,20 +33,34 @@ namespace UI.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            AddTokenHeader();
-            var response = _client.GetAsync(_client.BaseAddress + "Employees/GetEmployees");
-
-            var employeesJson = response.ToJson();
-            var employees = JsonConvert.DeserializeObject<List<Employee>>(employeesJson);
-            // Now you have the list of employees.
-
+          // AddTokenHeader();
+            var response = await _client.GetAsync(_client.BaseAddress + "Employees/GetEmployees");
+            var content = await response.Content.ReadAsStringAsync();
+            var employees = JsonConvert.DeserializeObject<List<Employee>>(content);
             return View(employees);
-
-
-            //return View("../Home/Login");
         }
+
+
+        // Now you have the list of employees.
+
+        //var employeesListViewModel = new EmployeesListViewModel()
+        //{
+        //    Employees = employees?.OrderBy(e => e.AccountId)
+        //                    .Skip((EmployeePage - 1) * PageSize)
+        //                    .Take(PageSize)
+        //};
+        //var pagingInfo = new PagingInfo
+        //{
+        //    CurrentPage = EmployeePage,
+        //    ItemsPerPage = PageSize,
+        //    TotalItems = employees.Count()
+        //};
+
+        //return View(employees);
+        //return View("../Home/Login");
+
 
         [HttpGet]
         public ActionResult Details(int id)
@@ -66,7 +82,7 @@ namespace UI.Controllers
         [HttpPost]
         public ActionResult Create(EmployeeDto employeeDto)
         {
-            AddTokenHeader();
+            //AddTokenHeader();
 
             string data = JsonConvert.SerializeObject(employeeDto);
             StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
@@ -101,7 +117,6 @@ namespace UI.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult Delete(int id)
         {
             AddTokenHeader();

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ERPSystem.Models.AccountDto>
+﻿@model IEnumerable<ERPSystem.Models.Account>
 
 @{
     ViewData["Title"] = "Index";
@@ -19,17 +19,18 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.AccountName)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new {/*  id=item. */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AccountName)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit"      , new { id=item.AccountId})   |
+                    @Html.ActionLink("Details", "Details", new { id = item.AccountId}) |
+                    @Html.ActionLink("Delete", "Delete"  ,new { id = item.AccountId})
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

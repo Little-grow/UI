@@ -35,13 +35,13 @@ namespace UI.Controllers
 
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            List<AccountDto> accounts = new();
+            List<Account> accounts = new();
             HttpResponseMessage response = _client.GetAsync(baseAddress + "/Accounts/Get").Result;
 
             if (response.IsSuccessStatusCode)
             {
                 string data = response.Content.ReadAsStringAsync().Result;
-                accounts = JsonConvert.DeserializeObject<List<AccountDto>>(data) ?? new();
+                accounts = JsonConvert.DeserializeObject<List<Account>>(data) ?? new();
             }
 
             return View(accounts);
@@ -54,13 +54,13 @@ namespace UI.Controllers
 
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var account = new AccountDto();
+            var account = new Account();
             HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + "Accounts/Get/{id}").Result;
 
             if (response.IsSuccessStatusCode)
             {
                 string data = response.Content.ReadAsStringAsync().Result;
-                account = JsonConvert.DeserializeObject<AccountDto>(data) ?? new();
+                account = JsonConvert.DeserializeObject<Account>(data) ?? new();
             }
 
             return View(account);
@@ -74,7 +74,7 @@ namespace UI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(AccountDto account)
+        public IActionResult Create(Account account)
         {
             AddTokenHeader();
 
@@ -114,7 +114,7 @@ namespace UI.Controllers
         }
 
         [HttpDelete]
-        public IActionResult Delete(int id, [FromBody] AccountDto account)
+        public IActionResult Delete(int id, [FromBody] Account account)
         {
             AddTokenHeader();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

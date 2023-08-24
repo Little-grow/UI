@@ -1,19 +1,14 @@
-﻿using Azure;
-using ERPSystem.Models;
-using Microsoft.AspNetCore.Http;
+﻿using ERPSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using NuGet.Protocol;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
-using UI.Models;
 
 namespace UI.Controllers
 {
     public class EmployeesController : Controller
     {
-        Uri baseAddress = new Uri("https://localhost:7038/api/");
+        Uri baseAddress = new Uri("https://localhost:7038/api");
         private readonly HttpClient _client;
         //private int PageSize = 4;
 
@@ -27,23 +22,33 @@ namespace UI.Controllers
         {
             // Get the token from the session
             string? authToken = HttpContext.Session.GetString("AuthToken");
-
+            // clear the header 
+            _client.DefaultRequestHeaders.Clear();
             // Add the token to the request headers
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+            _client.DefaultRequestHeaders.Add("Authorization", "Bearer " + authToken);
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-          // AddTokenHeader();
-            var response = await _client.GetAsync(_client.BaseAddress + "Employees/GetEmployees");
-            var content = await response.Content.ReadAsStringAsync();
-            var employees = JsonConvert.DeserializeObject<List<Employee>>(content);
+            AddTokenHeader();
+
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            List<EmployeeDto> employees = new();
+            HttpResponseMessage response = _client.GetAsync(baseAddress + "/Employees/GetEmployees").Result;
+
+            if(response.IsSuccessStatusCode)
+            {
+                string data = response.Content.ReadAsStringAsync().Result;
+                employees = JsonConvert.DeserializeObject<List<EmployeeDto>>(data) ?? new();
+            }
+            
             return View(employees);
         }
 
 
-        // Now you have the list of employees.
+        // Now you have the list of employees
 
         //var employeesListViewModel = new EmployeesListViewModel()
         //{
@@ -63,66 +68,80 @@ namespace UI.Controllers
 
 
         [HttpGet]
-        public ActionResult Details(int id)
+        public IActionResult Details(int id)
         {
             AddTokenHeader();
-            var response = _client.GetAsync(_client.BaseAddress + "Employees/GetEmployee/{id}");
-            var employeeJson = response.ToJson();
-            var employee = JsonConvert.DeserializeObject<Employee>(employeeJson);
+
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            
+            var employee = new EmployeeDto();
+            HttpResponseMessage response = _client.GetAsync(_client.BaseAddress + "Employees/Get/{id}").Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                string data = response.Content.ReadAsStringAsync().Result;
+                employee = JsonConvert.DeserializeObject<EmployeeDto>(data) ?? new(); 
+            }
+
             return View(employee);
         }
 
         [HttpGet]
-        public ActionResult Create()
+        public IActionResult Create()
         {
             AddTokenHeader();
             return View();
         }
 
         [HttpPost]
-        public ActionResult Create(EmployeeDto employeeDto)
+        public IActionResult Create(EmployeeDto employeeDto)
         {
-            //AddTokenHeader();
+            AddTokenHeader();
 
             string data = JsonConvert.SerializeObject(employeeDto);
             StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
 
-            var reponse = _client.PostAsync(_client.BaseAddress + "Employees/PostEmployee", content);
+            _client.PostAsync(_client.BaseAddress + "Employees/Post", content);
 
             return View();
         }
 
-        public ActionResult Edit()
+        [HttpGet]   
+        public IActionResult Edit()
         {
             AddTokenHeader();
             return View();
         }
 
         [HttpPost]
-        public ActionResult Edit(int id, EmployeeDto employeeDto)
+        public async Task<IActionResult> Edit(int id, EmployeeDto employeeDto)
         {
             AddTokenHeader();
 
             string data = JsonConvert.SerializeObject(employeeDto);
             StringContent content = new StringContent(data, Encoding.UTF8, "application/json");
 
-            var response = _client.PutAsync(_client.BaseAddress + "Employees/PutEmployee/{id}", content);
-            return View();
+            await _client.PutAsync("/Employees/Put/{id}", content);
+
+            return RedirectToAction("Index"); // Redirect regardless of response
         }
+
 
         [HttpGet]
-        public ActionResult Delete()
+        public IActionResult Delete()
         {
+            AddTokenHeader();
             return View();
         }
 
         [HttpPost]
-        public ActionResult Delete(int id)
+        public IActionResult DelZete(int id)
         {
             AddTokenHeader();
 
-            var reponse = _client.DeleteAsync(_client.BaseAddress + "Employees/DeleteEmployee/{id}");
-            return View("Home/Login");
+             _client.DeleteAsync(_client.BaseAddress + "Employees/Delete/{id}");
+           
+            return View();
         }
     }
 }

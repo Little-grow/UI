@@ -25,7 +25,8 @@ app.Use((context, next) =>
 {
     context.Request.Headers["Authorization"] = context.Session.GetString("Authorization") == null ? "" : context.Session.GetString("Authorization");
     return next.Invoke();
-}); app.UseRouting();
+}); 
+app.UseRouting();
 
 app.UseAuthorization();
 
